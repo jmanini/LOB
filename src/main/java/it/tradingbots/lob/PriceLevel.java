@@ -5,31 +5,32 @@
  */
 package it.tradingbots.lob;
 
-
 /**
  * A price level in an order book.
  */
 public final class PriceLevel {
 
-    private final long PRICE;
-    private final long VOLUME;
+	private final long PRICE;
+	private final long VOLUME;
 
-    /**
-     *
-     * @param price
-     * @param volume
-     */
-    public PriceLevel(long price, long volume) {
-        this.PRICE = price;
-        this.VOLUME = volume;
-    }
+	/**
+	 *
+	 * @param price
+	 * @param volume
+	 */
+	public PriceLevel(long price, long volume) {
+		this.PRICE = price;
+		this.VOLUME = volume;
+	}
 
-    public long getPrice() {
-        return PRICE;
-    }
+	public long getPrice() {
+		return PRICE;
+	}
 
-    public long getVolume() {
-        return VOLUME;
-    }
+	public long getVolume() {
+		return VOLUME;
+	}
+	
+	
 
 }

@@ -57,7 +57,7 @@ public class OrderBook extends AggregatedOrderBook {
 		 *		- 2.2 if the price is not in the list:
 		 *			- 2.2.1 if volume > 0 then create it
 		 **/
-		MyWeirdType<PriceLevel> t = new MyWeirdType<PriceLevel>(bids, MyWeirdType.Order.DESCENDING, fromTop);
+		LinkedListModifier<PriceLevel> t = new LinkedListModifier<PriceLevel>(bids, LinkedListModifier.Order.DESCENDING, fromTop);
 		Optional<PriceLevel> insertionPoint = t.get(PriceLevel::getPrice, price);
 		if (!insertionPoint.isPresent() && volume > 0) {
 			/* First bid */

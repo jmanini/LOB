@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 
-public class MyWeirdType<T> {
+public class LinkedListModifier<T> {
 	
 	enum Order {
 		ASCENDING,
@@ -22,7 +22,7 @@ public class MyWeirdType<T> {
 	private Order order;
 	private boolean fromTop;
 
-	public MyWeirdType(LinkedList<T> list, Order order, boolean fromTop) {
+	public LinkedListModifier(LinkedList<T> list, Order order, boolean fromTop) {
 		iterator = list.listIterator(fromTop ? 0 : list.size());
 
 		forward = fromTop ? iterator::next : iterator::previous;

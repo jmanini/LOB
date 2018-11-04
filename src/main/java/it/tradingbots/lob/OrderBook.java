@@ -13,7 +13,6 @@ public class OrderBook extends AggregatedOrderBook {
 		super(maxDepth);
 		asks = new LinkedList<PriceLevel>();
 		bids = new LinkedList<PriceLevel>();
-		
 	}
 
 	@Override

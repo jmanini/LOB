@@ -45,14 +45,15 @@ public class LinkedListModifier<T> {
 		while (more.getAsBoolean()) {
 			T current = forward.get();
 			if (found.test(current))
-				return Optional.of(current);
+				/* We're one element past the one we're looking for.Leave the iterator
+				 * positioned such as an add would put an element in the right place. */
+				back.get();
+			return Optional.of(current);
 		}
-		return Optional.empty();	
+		return Optional.empty();
 	}
 	
 	public void add(T e) {
-		if (iterator.hasPrevious() || iterator.hasNext())
-			back.get();
 		iterator.add(e);
 	}
 	

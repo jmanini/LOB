@@ -40,7 +40,7 @@ public class LinkedListModifier<T> {
 		 *      T                  F             key >= p
 		 *      F                  F             key <= p
 		 */
-		Predicate<T> found = fromTop == (order == Order.DESCENDING) ? (t -> key.applyAsLong(t) <= target) : (t -> key.applyAsLong(t) <= target);
+		Predicate<T> found = fromTop == (order == Order.DESCENDING) ? (t -> key.applyAsLong(t) <= target) : (t -> key.applyAsLong(t) >= target);
 		
 		while (more.getAsBoolean()) {
 			T current = forward.get();

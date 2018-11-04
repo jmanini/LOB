@@ -36,6 +36,18 @@ class OrderBookTest {
 	}
 	
 	@Test
+	void testSeveralNewOrdersFromTopSorted() {
+		OrderBook book = new OrderBook(50);
+		book.bid(70,  1000, true);
+		book.bid(60, 1500, true);
+		book.bid(50, 500, true);
+		assertIterableEquals(Arrays.asList(
+				new PriceLevel(70, 1000),
+				new PriceLevel(60, 1500),
+				new PriceLevel(50, 500)), book.getBids(0));
+	}
+	
+	@Test
 	void testSeveralNewOrdersFromBottom() {
 		OrderBook book = new OrderBook(50);
 		book.bid(50,  1000, false);

@@ -3,7 +3,6 @@ package it.tradingbots.lob;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Optional;
 
 public class OrderBook extends AggregatedOrderBook {
@@ -40,94 +39,35 @@ public class OrderBook extends AggregatedOrderBook {
 		asks.clear();
 		bids.clear();
 	}
+	
+	private void insert(PriceLevel pl, LinkedListModifier<PriceLevel> modifier) {
+		Optional<PriceLevel> insertionPoint = modifier.get(PriceLevel::getPrice, pl.getPrice());
+		if (!insertionPoint.isPresent() && pl.getVolume() > 0) {
+			/* First bid */
+			modifier.add(pl);
+		} else if (insertionPoint.isPresent()) {
+			if (insertionPoint.get().getPrice() == pl.getPrice()) {
+				/* Update */
+				if (pl.getVolume() > 0)
+					modifier.set(pl);
+				else
+					modifier.remove();
+			} else /* Create */
+				modifier.add(pl);
+		}
+	}
 
 	@Override
 	public void bid(long price, long volume, boolean fromTop) {
-		/**
-		 * Idea: two cases, beginning from the top or from the bottom of the list
-		 * - case 1: from the top:
-		 * 		- 1.1 if the price is in the list:
-		 * 			- 1.1.1. if volume > 0, then I have to update it
-		 * 			- 1.1.2 if volume <= 0, delete it
-		 *		- 1.2 if the price is not in the list:
-		 *			- 1.2.1 if volume > 0 then create it
-		 * - case 2: from the bottom:
-		 * 		- 2.1 if the price is in the list:
-		 * 			- 2.1.1 if volume > 0, then I have to update it
-		 * 			- 2.1.2 if volume <= 0, delete it
-		 *		- 2.2 if the price is not in the list:
-		 *			- 2.2.1 if volume > 0 then create it
-		 **/
-		LinkedListModifier<PriceLevel> t = new LinkedListModifier<PriceLevel>(bids, LinkedListModifier.Order.DESCENDING, fromTop);
-		Optional<PriceLevel> insertionPoint = t.get(PriceLevel::getPrice, price);
-		if (!insertionPoint.isPresent() && volume > 0) {
-			/* First bid */
-			t.add(new PriceLevel(price, volume));
-		} else if (insertionPoint.isPresent()) {
-			if (insertionPoint.get().getPrice() == price) {
-				/* Update */
-				if (volume > 0)
-					t.set(new PriceLevel(price, volume));
-				else
-					t.remove();
-			} else /* Create */
-				t.add(new PriceLevel(price, volume));
-		}
+		LinkedListModifier<PriceLevel> modifier = new LinkedListModifier<PriceLevel>(bids, LinkedListModifier.Order.DESCENDING, fromTop);
+		insert(new PriceLevel(price, volume), modifier);
 	}
 	
 
 	@Override
 	public void ask(long price, long volume, boolean fromTop) {
-		LinkedList<Long> askPrices = new LinkedList<Long>();
-		for (Iterator iterator = asks.iterator(); iterator.hasNext();) {
-			PriceLevel currentElem = (PriceLevel) iterator.next();	
-			askPrices.add(currentElem.getPrice());
-		}
-		
-		if (fromTop) {
-			PriceLevel pl = new PriceLevel(price, volume);
-			if (askPrices.indexOf(price)>=0) {
-				int index = askPrices.indexOf(price);
-				if (volume > 0 && asks.get(index).getVolume() != volume) {
-					asks.remove(index);
-					asks.add(index, pl);
-				}
-				else if (volume < 0) {
-					asks.remove(index);
-				}
-			}
-			else if (volume > 0){
-				for (Iterator iterator = askPrices.iterator(); iterator.hasNext();) {
-					Long currentElem = (Long) iterator.next();
-					if (price < currentElem) {
-						asks.add(askPrices.indexOf(currentElem), pl);						
-						break;
-					}
-				}
-			}
-		}
-		else {
-			PriceLevel pl = new PriceLevel(price, volume);
-			if (askPrices.lastIndexOf(price)>=0) {
-				int index = askPrices.lastIndexOf(price);
-				if (volume > 0 && asks.get(index).getVolume() != volume) {
-					asks.remove(index);
-					asks.add(index, pl);
-				}
-				else if (volume < 0) {
-					asks.remove(index);
-				}
-			}
-			else if (volume > 0) {
-				for (Iterator iterator = askPrices.descendingIterator(); iterator.hasNext();) {
-					Long currentElem = (Long) iterator.next();
-					if (price < currentElem) {
-						asks.add(askPrices.lastIndexOf(currentElem), pl);
-						break;
-					}
-				}
-			}
-		}
+		LinkedListModifier<PriceLevel> modifier = new LinkedListModifier<PriceLevel>(asks, LinkedListModifier.Order.ASCENDING, fromTop);
+		insert(new PriceLevel(price, volume), modifier);
 	}
 
 	@Override

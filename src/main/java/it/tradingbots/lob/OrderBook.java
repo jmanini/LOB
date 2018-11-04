@@ -1,13 +1,15 @@
 package it.tradingbots.lob;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class OrderBook extends AggregatedOrderBook {
-	private static List<PriceLevel> asks;
-	private static List<PriceLevel> bids;
+	private static LinkedList<PriceLevel> asks;
+	private static LinkedList<PriceLevel> bids;
 	
 	public OrderBook(int maxDepth) {
 		super(maxDepth);
@@ -39,6 +41,16 @@ public class OrderBook extends AggregatedOrderBook {
 		bids.clear();
 	}
 
+	private Stream<PriceLevel> getStream(LinkedList<PriceLevel> source, boolean fromTop) {
+		if (fromTop)
+			return source.stream();
+		else {
+			Iterator<PriceLevel> i = source.descendingIterator();
+			Iterable<PriceLevel> iterable = () -> i;
+			return StreamSupport.stream(iterable.spliterator(), false);
+		}
+	}
+	
 	@Override
 	public void bid(long price, long volume, boolean fromTop) {
 		/**
@@ -55,73 +67,22 @@ public class OrderBook extends AggregatedOrderBook {
 		 * 			- 2.1.2 if volume <= 0, delete it
 		 *		- 2.2 if the price is not in the list:
 		 *			- 2.2.1 if volume > 0 then create it
-		 **/		
-		/**if (fromTop) {
-			for (Iterator iterator = bids.iterator(); iterator.hasNext();) {
-				PriceLevel currentElem = (PriceLevel) iterator.next();
-				if (currentElem.getPrice() == price) {
-					if (volume > 0 && volume != currentElem.getVolume()) {
-						int index = bids.indexOf(currentElem);
-						PriceLevel pl = new PriceLevel(price, volume);
-						bids.remove(currentElem);
-						bids.add(index, pl);
-					}
-					else if (volume < 0){
-						bids.remove(currentElem);						
-					}
-				}
-			}
-		}**/
-		
-		LinkedList<Long> bidsPrices = new LinkedList<Long>();
-		for (Iterator iterator = bids.iterator(); iterator.hasNext();) {
-			PriceLevel currentElem = (PriceLevel) iterator.next();	
-			bidsPrices.add(currentElem.getPrice());
-		}
-		
-		if (fromTop) {
-			PriceLevel pl = new PriceLevel(price, volume);
-			if (bidsPrices.indexOf(price)>=0) {
-				int index = bidsPrices.indexOf(price);
-				if (volume > 0 && bids.get(index).getVolume() != volume) {
+		 **/	
+		Stream<PriceLevel> s = getStream(bids, fromTop);
+		Optional<PriceLevel> oldPrice = s.filter(pl -> pl.getPrice() <= price).findFirst();
+		if (!oldPrice.isPresent() && volume > 0) {
+			/* First bid */
+			bids.add(new PriceLevel(price, volume));
+		} else if (oldPrice.isPresent()) {
+			int index = bids.indexOf(oldPrice.get());
+			if (oldPrice.get().getPrice() == price) {
+				/* Update */
+				if (volume > 0)
+					bids.set(index, new PriceLevel(price, volume));
+				else
 					bids.remove(index);
-					bids.add(index, pl);
-				}
-				else if (volume < 0) {
-					bids.remove(index);
-				}
-			}
-			else if (volume > 0){
-				for (Iterator iterator = bidsPrices.iterator(); iterator.hasNext();) {
-					Long currentElem = (Long) iterator.next();
-					if (price > currentElem) {
-						bids.add(bidsPrices.indexOf(currentElem), pl);						
-						break;
-					}
-				}
-			}
-		}
-		else {
-			PriceLevel pl = new PriceLevel(price, volume);
-			if (bidsPrices.lastIndexOf(price)>=0) {
-				int index = bidsPrices.lastIndexOf(price);
-				if (volume > 0 && bids.get(index).getVolume() != volume) {
-					bids.remove(index);
-					bids.add(index, pl);
-				}
-				else if (volume < 0) {
-					bids.remove(index);
-				}
-			}
-			else if (volume > 0) {
-				for (Iterator iterator = bidsPrices.descendingIterator(); iterator.hasNext();) {
-					Long currentElem = (Long) iterator.next();
-					if (price > currentElem) {
-						bids.add(bidsPrices.lastIndexOf(currentElem), pl);
-						break;
-					}
-				}
-			}
+			} else /* Create */
+				bids.add(index, new PriceLevel(price, volume));
 		}
 	}
 	

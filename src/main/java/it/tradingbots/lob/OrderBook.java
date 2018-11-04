@@ -21,7 +21,7 @@ public class OrderBook extends AggregatedOrderBook {
 		if (maxLevels <= 0) {
 			return bids;
 		} else {
-			return bids.subList(0, maxLevels-1);
+			return bids.subList(0, Math.min(maxLevels, bids.size()));
 		}
 	}
 
@@ -30,7 +30,7 @@ public class OrderBook extends AggregatedOrderBook {
 		if (maxLevels <= 0) {
 			return asks;
 		} else {
-			return asks.subList(0, maxLevels-1);
+			return asks.subList(0, Math.min(maxLevels, asks.size()));
 		}
 	}
 

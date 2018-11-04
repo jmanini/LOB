@@ -3,9 +3,8 @@ package it.tradingbots.lob;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class OrderBook extends AggregatedOrderBook {
 	private static LinkedList<PriceLevel> asks;
@@ -41,16 +40,6 @@ public class OrderBook extends AggregatedOrderBook {
 		bids.clear();
 	}
 
-	private Stream<PriceLevel> getStream(LinkedList<PriceLevel> source, boolean fromTop) {
-		if (fromTop)
-			return source.stream();
-		else {
-			Iterator<PriceLevel> i = source.descendingIterator();
-			Iterable<PriceLevel> iterable = () -> i;
-			return StreamSupport.stream(iterable.spliterator(), false);
-		}
-	}
-	
 	@Override
 	public void bid(long price, long volume, boolean fromTop) {
 		/**
@@ -67,22 +56,21 @@ public class OrderBook extends AggregatedOrderBook {
 		 * 			- 2.1.2 if volume <= 0, delete it
 		 *		- 2.2 if the price is not in the list:
 		 *			- 2.2.1 if volume > 0 then create it
-		 **/	
-		Stream<PriceLevel> s = getStream(bids, fromTop);
-		Optional<PriceLevel> oldPrice = s.filter(pl -> pl.getPrice() <= price).findFirst();
-		if (!oldPrice.isPresent() && volume > 0) {
+		 **/
+		MyWeirdType<PriceLevel> t = new MyWeirdType<PriceLevel>(bids, MyWeirdType.Order.DESCENDING, fromTop);
+		Optional<PriceLevel> insertionPoint = t.get(PriceLevel::getPrice, price);
+		if (!insertionPoint.isPresent() && volume > 0) {
 			/* First bid */
-			bids.add(new PriceLevel(price, volume));
-		} else if (oldPrice.isPresent()) {
-			int index = bids.indexOf(oldPrice.get());
-			if (oldPrice.get().getPrice() == price) {
+			t.add(new PriceLevel(price, volume));
+		} else if (insertionPoint.isPresent()) {
+			if (insertionPoint.get().getPrice() == price) {
 				/* Update */
 				if (volume > 0)
-					bids.set(index, new PriceLevel(price, volume));
+					t.set(new PriceLevel(price, volume));
 				else
-					bids.remove(index);
+					t.remove();
 			} else /* Create */
-				bids.add(index, new PriceLevel(price, volume));
+				t.add(new PriceLevel(price, volume));
 		}
 	}
 	

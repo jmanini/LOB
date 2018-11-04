@@ -7,13 +7,14 @@ import java.util.ListIterator;
 import java.util.Optional;
 
 public class OrderBook extends AggregatedOrderBook {
-	private static LinkedList<PriceLevel> asks;
-	private static LinkedList<PriceLevel> bids;
+	private LinkedList<PriceLevel> asks;
+	private LinkedList<PriceLevel> bids;
 	
 	public OrderBook(int maxDepth) {
 		super(maxDepth);
 		asks = new LinkedList<PriceLevel>();
 		bids = new LinkedList<PriceLevel>();
+		
 	}
 
 	@Override

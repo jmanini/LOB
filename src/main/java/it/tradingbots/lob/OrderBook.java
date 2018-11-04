@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class OrderBook extends AggregatedOrderBook {
 	private LinkedList<PriceLevel> asks;
@@ -78,29 +79,26 @@ public class OrderBook extends AggregatedOrderBook {
 	public boolean isConsistent() {
 		return bids.get(0).getPrice() <= asks.get(0).getPrice();
 	}
-
-	@Override
-	public long bidVolumeAtPrice(long priceLimit) {
+	
+	private long cumulateVolumeWhile(List<PriceLevel> list, Predicate<PriceLevel> p) {
 		long ret = 0;
-		for (PriceLevel pl : bids) {
-			if (pl.getPrice() >= priceLimit)
+		for (PriceLevel pl : list) {
+			if (p.test(pl))
 				ret += pl.getVolume();
 			else
-				break; /* Bids are descending in price, so we're done */
+				break;
 		}
 		return ret;
 	}
 
 	@Override
+	public long bidVolumeAtPrice(long priceLimit) {
+		return cumulateVolumeWhile(bids, (pl -> pl.getPrice() >= priceLimit));
+	}
+
+	@Override
 	public long askVolumeAtPrice(long priceLimit) {
-		long ret = 0;
-		for (PriceLevel pl : asks) {
-			if (pl.getPrice() <= priceLimit)
-				ret += pl.getVolume();
-			else
-				break; /* Asks are ascending in price, so we're done */
-		}
-		return ret;
+		return cumulateVolumeWhile(asks, (pl -> pl.getPrice() <= priceLimit));
 	}
 	
 	private void toJSONObject(PriceLevel pl, StringBuilder target) {

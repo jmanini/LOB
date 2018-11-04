@@ -83,8 +83,8 @@ public class OrderBook extends AggregatedOrderBook {
 	public long bidVolumeAtPrice(long priceLimit) {
 		long result = 0;
 		
-		for (Iterator iterator = bids.iterator(); iterator.hasNext();) {
-			PriceLevel currentElem = (PriceLevel) iterator.next();
+		for (Iterator<PriceLevel> iterator = bids.iterator(); iterator.hasNext();) {
+			PriceLevel currentElem = iterator.next();
 			if (currentElem.getPrice() >= priceLimit) {
 				result += currentElem.getPrice();
 			}			
@@ -97,8 +97,8 @@ public class OrderBook extends AggregatedOrderBook {
 	public long askVolumeAtPrice(long priceLimit) {
 		long result = 0;
 		
-		for (Iterator iterator = asks.iterator(); iterator.hasNext();) {
-			PriceLevel currentElem = (PriceLevel) iterator.next();
+		for (Iterator<PriceLevel> iterator = asks.iterator(); iterator.hasNext();) {
+			PriceLevel currentElem = iterator.next();
 			if (currentElem.getPrice() <= priceLimit) {
 				result += currentElem.getPrice();
 			}
@@ -106,6 +106,28 @@ public class OrderBook extends AggregatedOrderBook {
 		}
 		
 		return result;
+	}
+	
+	private void toJSONObject(PriceLevel pl, StringBuilder target) {
+		target.append('[');
+		target.append(pl.getPrice());
+		target.append(',');
+		target.append(pl.getVolume());
+		target.append(']');
+	}
+	
+	private void toJSONObject(List<PriceLevel> list, StringBuilder target) {
+		target.append('[');
+		Iterator<PriceLevel> it = list.iterator();
+		if (it.hasNext()) {
+			toJSONObject(it.next(), target);
+
+			while (it.hasNext()) {
+				target.append(", ");
+				toJSONObject(it.next(), target);
+			}
+		}
+		target.append(']');
 	}
 
 	/**
@@ -121,7 +143,14 @@ public class OrderBook extends AggregatedOrderBook {
 	 */	
 	@Override
 	public String toJSONObject(int maxLevels) {
-		return null;
+		StringBuilder ret = new StringBuilder(String.format("{\"timestamp\": %d, \"bids\": ", getTimestamp()));
+		
+		toJSONObject(getBids(maxLevels), ret);
+		ret.append(", \"asks\": ");
+		toJSONObject(getAsks(maxLevels), ret);
+		ret.append('}');
+			
+		return ret.toString();
 	}
 
 }

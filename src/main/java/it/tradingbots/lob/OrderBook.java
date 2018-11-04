@@ -123,17 +123,6 @@ public class OrderBook extends AggregatedOrderBook {
 		target.append(']');
 	}
 
-	/**
-	 * Serializes the order book as a String in JSON format.
-	 * <p>
-	 * The JSON format is as follows:
-	 * {"timestamp":&lt;timestamp&gt;,"bids":"[&lt;bids array&gt;]","asks":"[
-	 * &lt;asks array&gt;]}"
-	 *
-	 * @param maxLevels The maximum number of price levels to return. If &lt= 0
-	 *                  returns all price levels.
-	 * @return String
-	 */	
 	@Override
 	public String toJSONObject(int maxLevels) {
 		StringBuilder ret = new StringBuilder(String.format("{\"timestamp\": %d, \"bids\": ", getTimestamp()));

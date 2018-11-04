@@ -42,7 +42,7 @@ public class OrderBook extends AggregatedOrderBook {
 	private void insert(PriceLevel pl, LinkedListModifier<PriceLevel> modifier) {
 		Optional<PriceLevel> insertionPoint = modifier.get(PriceLevel::getPrice, pl.getPrice());
 		if (!insertionPoint.isPresent() && pl.getVolume() > 0) {
-			/* First bid */
+			/* New element goes to an endpoint (first element is a particular case of that). */
 			modifier.add(pl);
 		} else if (insertionPoint.isPresent()) {
 			if (insertionPoint.get().getPrice() == pl.getPrice()) {

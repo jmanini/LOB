@@ -38,4 +38,8 @@ public final class PriceLevel {
 		else
 			return false;
 	}
+	
+	public String toString() {
+		return String.format("PriceLevel(%d, %d)", PRICE, VOLUME);
+	}
 }

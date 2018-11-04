@@ -152,4 +152,26 @@ class OrderBookTest {
 		book.ask(80,  100, true);
 		assertEquals(String.format("{\"timestamp\": %d, \"bids\": [[90,700], [60,1000], [20,400]], \"asks\": [[10,200], [80,100]]}", timestamp), book.toJSONObject(0));
 	}
+	
+	@Test
+	void testBidVolumeAtPrice() {
+		OrderBook book = new OrderBook(50);
+		book.bid(90,  1000, true);
+		book.bid(60,  400, true);
+		book.bid(40,  700, true);
+		book.bid(20,  300, true);
+		book.bid(10,  1700, true);
+		assertEquals(1000 + 400 + 700, book.bidVolumeAtPrice(40));
+	}
+	
+	@Test
+	void testAskVolumeAtPrice() {
+		OrderBook book = new OrderBook(50);
+		book.ask(90,  1000, true);
+		book.ask(60,  400, true);
+		book.ask(40,  700, true);
+		book.ask(20,  300, true);
+		book.ask(10,  1700, true);
+		assertEquals(700 + 300 + 1700, book.askVolumeAtPrice(40));
+	}
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -173,5 +174,51 @@ class OrderBookTest {
 		book.ask(20,  300, true);
 		book.ask(10,  1700, true);
 		assertEquals(700 + 300 + 1700, book.askVolumeAtPrice(40));
+	}
+	
+	@Test
+	void testDiffRemove() {
+		List<PriceLevel> original = Arrays.asList(
+				new PriceLevel(50, 1000),
+				new PriceLevel(20, 500));
+		List<PriceLevel> newOne = Arrays.asList();
+		assertIterableEquals(Arrays.asList(
+				new PriceLevel(50, 0),
+				new PriceLevel(20, 0)), AggregatedOrderBook.diff(original, newOne));
+	}
+	
+	@Test
+	void testDiffAdd() {
+		List<PriceLevel> original = Arrays.asList();
+		List<PriceLevel> newOne = Arrays.asList(
+				new PriceLevel(50, 1000),
+				new PriceLevel(20, 500));
+		assertIterableEquals(Arrays.asList(
+				new PriceLevel(50, 1000),
+				new PriceLevel(20, 500)), AggregatedOrderBook.diff(original, newOne));
+	}
+	
+	@Test
+	void testDiffNoChange() {
+		List<PriceLevel> original = Arrays.asList(
+				new PriceLevel(50, 1000),
+				new PriceLevel(20, 500));
+		List<PriceLevel> newOne = Arrays.asList(
+				new PriceLevel(50, 1000),
+				new PriceLevel(20, 500));
+		assertIterableEquals(Arrays.asList(), AggregatedOrderBook.diff(original, newOne));
+	}
+	
+	@Test
+	void testDiffUpdate() {
+		List<PriceLevel> original = Arrays.asList(
+				new PriceLevel(50, 1000),
+				new PriceLevel(20, 500));
+		List<PriceLevel> newOne = Arrays.asList(
+				new PriceLevel(50, 700),
+				new PriceLevel(20, 550));
+		assertIterableEquals(Arrays.asList(
+				new PriceLevel(50, 700),
+				new PriceLevel(20, 550)), AggregatedOrderBook.diff(original, newOne));
 	}
 }

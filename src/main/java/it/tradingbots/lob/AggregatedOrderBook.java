@@ -52,7 +52,7 @@ public abstract class AggregatedOrderBook {
 
 		for (Long key : originalMap.keySet()) {
 			// if (p1, v1) ∈ originalLits, (p1, v2) ∈ newList / v1 != v2 -> (p1, v2) ∈ diff
-			if (newMap.containsKey(key) && originalMap.get(key) != newMap.get(key)) {
+			if (newMap.containsKey(key) && !originalMap.get(key).equals(newMap.get(key))) {
 				PriceLevel pl = new PriceLevel(key, newMap.get(key));
 				result.add(pl);
 			}

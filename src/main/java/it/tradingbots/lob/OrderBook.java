@@ -77,7 +77,7 @@ public class OrderBook extends AggregatedOrderBook {
 
 	@Override
 	public boolean isConsistent() {
-		return bids.get(0).getPrice() <= asks.get(0).getPrice();
+		return bids.size() > 0 && asks.size() > 0 && bids.getFirst().getPrice() <= asks.getFirst().getPrice();
 	}
 	
 	private long cumulateVolumeWhile(List<PriceLevel> list, Predicate<PriceLevel> p) {

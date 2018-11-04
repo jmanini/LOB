@@ -31,6 +31,11 @@ public final class PriceLevel {
 		return VOLUME;
 	}
 	
-	
-
+	public boolean equals(Object o) {
+		if (o == this) return true;
+		if (o instanceof PriceLevel)
+			return ((PriceLevel) o).PRICE == PRICE && ((PriceLevel) o).VOLUME == VOLUME;
+		else
+			return false;
+	}
 }

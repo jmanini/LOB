@@ -81,31 +81,12 @@ public class OrderBook extends AggregatedOrderBook {
 
 	@Override
 	public long bidVolumeAtPrice(long priceLimit) {
-		long result = 0;
-		
-		for (Iterator<PriceLevel> iterator = bids.iterator(); iterator.hasNext();) {
-			PriceLevel currentElem = iterator.next();
-			if (currentElem.getPrice() >= priceLimit) {
-				result += currentElem.getPrice();
-			}			
-		}
-		
-		return result;
+		return bids.stream().filter(pl -> pl.getPrice() >= priceLimit).mapToLong(pl -> pl.getPrice()).sum();
 	}
 
 	@Override
 	public long askVolumeAtPrice(long priceLimit) {
-		long result = 0;
-		
-		for (Iterator<PriceLevel> iterator = asks.iterator(); iterator.hasNext();) {
-			PriceLevel currentElem = iterator.next();
-			if (currentElem.getPrice() <= priceLimit) {
-				result += currentElem.getPrice();
-			}
-			
-		}
-		
-		return result;
+		return asks.stream().filter(pl -> pl.getPrice() <= priceLimit).mapToLong(pl -> pl.getPrice()).sum();
 	}
 	
 	private void toJSONObject(PriceLevel pl, StringBuilder target) {

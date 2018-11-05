@@ -85,7 +85,7 @@ public class OrderBook extends AggregatedOrderBook {
 		for (PriceLevel pl : list) {
 			if (p.test(pl))
 				ret += pl.getVolume();
-			else
+			else	/* list is expected to be sorted wrt p, so once it's false we're done */
 				break;
 		}
 		return ret;
